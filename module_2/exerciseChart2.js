@@ -8,7 +8,6 @@ async function drawScatter() {
   const cleanedDataSet = dataset.filter(data => {
     return data.latitude !== "NA" && data.ms_rates_per_100000 !== "NA"
   })
-  console.log(cleanedDataSet)
 
   // Take absolute value of latitude. Converting negative numbers to positive allows for a linear
   // trend line if there is a correlation. If negative latitudes are also used then a "V" shaped
