@@ -3,15 +3,19 @@ import * as d3 from "d3";
 async function drawScatter() {
 
   // 1. Access data
-  let dataset = await d3.csv("./data/MMA_fighters.csv")
+  let dataset = await d3.csv("./data/ms_rates.csv")
   // Remove data rows with NA for the values I am interested in
   const cleanedDataSet = dataset.filter(data => {
-    return data.Reach !== "NA" && data.Win_Percentage !== "NA" && data.Weight !== "NA"
+    return data.latitude !== "NA" && data.ms_rates_per_100000 !== "NA"
   })
+  console.log(cleanedDataSet)
 
-  const xAccessor = d => d.Reach
-  const yAccessor = d => d.Win_Percentage
-  const colorAccessor = d => d.Weight
+  // Take absolute value of latitude. Converting negative numbers to positive allows for a linear
+  // trend line if there is a correlation. If negative latitudes are also used then a "V" shaped
+  // trend around 0 would be expected. The main point of interest is distance from the equator so
+  // north/south doesn't matter
+  const xAccessor = d => Math.abs(d.latitude)
+  const yAccessor = d => d.ms_rates_per_100000
 
   // 2. Create chart dimensions
 
@@ -38,7 +42,7 @@ async function drawScatter() {
 
   // 3. Draw canvas
 
-  const wrapper = d3.select("#exercise-wrapper")
+  const wrapper = d3.select("#exercise-wrapper-2")
     .append("svg")
       .attr("width", dimensions.width)
       .attr("height", dimensions.height)
@@ -55,16 +59,10 @@ async function drawScatter() {
   const xScale = d3.scaleLinear()
     .domain(d3.extent(cleanedDataSet, xAccessor))
     .range([0, dimensions.boundedWidth])
-    .nice()
 
   const yScale = d3.scaleLinear()
     .domain(d3.extent(cleanedDataSet, yAccessor))
     .range([dimensions.boundedHeight, 0])
-    .nice()
-
-  const colorScale = d3.scaleLinear()
-    .domain(d3.extent(cleanedDataSet, colorAccessor))
-    .range(["skyblue", "darkslategrey"])
 
   // 5. Draw data
 
@@ -74,7 +72,7 @@ async function drawScatter() {
       .attr("cx", d => xScale(xAccessor(d)))
       .attr("cy", d => yScale(yAccessor(d)))
       .attr("r", 4)
-      .attr("fill", d => colorScale(colorAccessor(d)))
+      .attr("fill", "skyblue")
       .attr("tabindex", "0")
 
   // 6. Draw peripherals
@@ -91,7 +89,7 @@ async function drawScatter() {
       .attr("y", dimensions.margin.bottom - 10)
       .attr("fill", "black")
       .style("font-size", "1.4em")
-      .html("Reach")
+      .html("Latitude (Ignoring north/south difference)")
 
   const yAxisGenerator = d3.axisLeft()
     .scale(yScale)
@@ -105,7 +103,7 @@ async function drawScatter() {
       .attr("y", -dimensions.margin.left + 10)
       .attr("fill", "black")
       .style("font-size", "1.4em")
-      .text("Win Percentage")
+      .text("MS Rates per 100,000")
       .style("transform", "rotate(-90deg)")
       .style("text-anchor", "middle")
 }
