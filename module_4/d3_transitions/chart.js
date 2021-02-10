@@ -125,8 +125,6 @@ async function drawBars() {
         .transition()
           .style("fill", "cornflowerblue")
 
-    console.log(barRects)
-
     const barText = binGroups.select("text")
       .transition(updateTransition)
         .attr("x", d => xScale(d.x0) + (xScale(d.x1) - xScale(d.x0)) / 2)
