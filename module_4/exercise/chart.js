@@ -53,7 +53,7 @@ async function drawBars() {
       .range([0, dimensions.boundedWidth])
 
     const yScale = d3.scaleLinear()
-      .domain(d3.extent(dataset, yAccessor))
+      .domain([0, d3.max(dataset.map(d => d.total_time))])
       .range([dimensions.boundedHeight, 0])
       .nice()
 
@@ -71,18 +71,6 @@ async function drawBars() {
     let barGroups = bounds.select(".bars")
       .selectAll(".bar")
       .data(dataset)
-
-    const oldBarGroups = barGroups.exit()
-    oldBarGroups.selectAll("rect")
-      .style("fill", "red")
-      .transition(exitTransition)
-      .attr("height", 0)
-      .attr("y", d => dimensions.boundedHeight)
-    oldBarGroups.selectAll("text")
-      .transition(exitTransition)
-      .attr("y", dimensions.boundedHeight)
-    oldBarGroups.transition(exitTransition)
-      .remove()
 
     const newBarGroups = barGroups.enter().append("g")
       .attr("class", "bar")
