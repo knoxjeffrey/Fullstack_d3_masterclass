@@ -9,7 +9,7 @@ async function drawBars() {
 
   let dimensions = {
     width: window.innerWidth * 0.9,
-    height: 400,
+    height: 700,
     margin: {
       top: 80,
       right: 50,
@@ -38,23 +38,23 @@ async function drawBars() {
   bounds.append("g")
     .attr("class", "bars")
   bounds.append("g")
-    .attr("class", "x-axis")
-    .style("transform", `translateY(${dimensions.boundedHeight}px)`)
+    .attr("class", "y-axis")
     .append("text")
-    .attr("class", "x-axis-label")
+    .attr("class", "y-axis-label")
+    .style("transform", `translateY(${dimensions.boundedHeight}px)`)
 
   const drawBarChart = metric => {
-    const metricAccessor = d => d.build_number
-    const yAccessor = d => +d[metric]
+    const xAccessor = d => +d[metric]
+    const yAccessor = d => d.build_number
 
     // 4. Create scales
-    const xScale = d3.scaleBand()
-      .domain(dataset.map(metricAccessor))
-      .range([0, dimensions.boundedWidth])
+    const yScale = d3.scaleBand()
+      .domain(dataset.map(yAccessor))
+      .range([0, dimensions.boundedHeight - dimensions.margin.bottom])
 
-    const yScale = d3.scaleLinear()
+    const xScale = d3.scaleLinear()
       .domain([0, d3.max(dataset.map(d => d.total_time))])
-      .range([dimensions.boundedHeight, 0])
+      .range([0, dimensions.boundedWidth])
       .nice()
 
     // 5. Draw data
@@ -75,13 +75,13 @@ async function drawBars() {
     const newBarGroups = barGroups.enter().append("g")
       .attr("class", "bar")
     newBarGroups.append("rect")
-      .attr("x", d => xScale(metricAccessor(d)))
+      .attr("x", 0)
       .attr("y", d => dimensions.boundedHeight)
-      .attr("width", xScale.bandwidth())
-      .attr("height", 0)
+      .attr("width", 0)
+      .attr("height", yScale.bandwidth())
       .style("fill", "yellowgreen")
     newBarGroups.append("text")
-      .attr("x", d => xScale(metricAccessor(d)))
+      .attr("x", d => xScale(xAccessor(d)))
       .attr("y", dimensions.boundedHeight)
 
     // update barGroups to include new points
@@ -89,31 +89,31 @@ async function drawBars() {
     
     const barRects = barGroups.select("rect")
       .transition(updateTransition)
-      .attr("x", d => xScale(metricAccessor(d)))
+      .attr("x", 0)
       .attr("y", d => yScale(yAccessor(d)))
-      .attr("width", xScale.bandwidth())
-      .attr("height", d => dimensions.boundedHeight - yScale(yAccessor(d)))
+      .attr("width", d => xScale(xAccessor(d)))
+      .attr("height", yScale.bandwidth())
       .transition()
       .style("fill", "cornflowerblue")
 
     const barText = barGroups.select("text")
       .transition(updateTransition)
-      .attr("x", d => xScale(metricAccessor(d)))
-      .attr("y", d => yScale(yAccessor(d)) - 5)
-      .text(yAccessor)
+      .attr("x", d => xScale(xAccessor(d)) + 10)
+      .attr("y", d => yScale(yAccessor(d)) + 5)
+      .text(xAccessor)
 
     // 6. Draw peripherals
 
-    const xAxisGenerator = d3.axisBottom()
-      .scale(xScale)
+    const yAxisGenerator = d3.axisLeft()
+      .scale(yScale)
 
-    const xAxis = bounds.select(".x-axis")
+    const yAxis = bounds.select(".y-axis")
       .transition(updateTransition)
-      .call(xAxisGenerator)
+      .call(yAxisGenerator)
 
-    const xAxisLabel = xAxis.select(".x-axis-label")
+    const yAxisLabel = yAxis.select(".y-axis-label")
       .attr("x", dimensions.boundedWidth / 2)
-      .attr("y", dimensions.margin.bottom - 10)
+      .attr("y", 0)
       .text(metric)
   }
 
