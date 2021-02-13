@@ -23,9 +23,9 @@ fullstack-d3-book-current-advanced.pdf
 /module_4/exercise/node_modules
 /module_4/exercise/dist
 /module_4/exercise/.cache
-/module_5/node_modules
-/module_5/dist
-/module_5/.cache
+/module_5/event_listeners/node_modules
+/module_5/event_listeners/dist
+/module_5/event_listeners/.cache
 /module_6/node_modules
 /module_6/dist
 /module_6/.cache
