@@ -1,36 +1,71 @@
-.bar rect {
-  fill: cornflowerblue;
+.lollipop rect {
+  cursor: pointer;
+  pointer-events: all;
+  visibility: hidden;
 }
-.bar text {
+
+.lollipop.active line {
+  stroke: #FF80BB !important;
+}
+
+.lollipop.active circle {
+  stroke: #FF80BB !important;
+}
+
+.lollipop text {
   text-anchor: middle;
   fill: darkgrey;
-  font-size: 12px;
-  font-family: sans-serif;
+  font-size: 10px;
+  font-family: verdana;
 }
 
-.y-axis-label {
-  fill: black;
-  font-size: 1.4em;
-  text-transform: capitalize;
+.tick text {
+  text-anchor: end;
+  fill: darkgrey;
+  font-size: 10px;
+  font-family: verdana;
 }
 
-body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2em;
+.header {
+  font-family: verdana;
+  margin-left: 3em;
+}
+
+.header h1 {
+  margin-bottom: 0.1em;
+}
+
+.header .button-group {
+  display: inline-block;
+}
+
+.header .time-group {
+  background:#69b3a2;
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 2em;
+  width: 4em;
+  height: 4em;
+}
+
+.header .time-group p {
+  color: white;
+  line-height: 2em;
+  opacity: 1;
+  text-align: center;
+  transition: 250ms opacity;
 }
 
 button {
-  font-size: 1.2em;
-  margin-left: 1em;
+  font-size: 0.8em;
+  margin-right: 1em;
   padding: 0.5em 1em;
   appearance: none;
   -webkit-appearance: none;
-  background:darkseagreen;
+  background:#69b3a2;
   color: white;
   border: none;
-  box-shadow: 0 5px 0 0 seagreen;
+  box-shadow: 0 5px 0 0 #32665A;
   border-radius: 6px;
   font-weight: 600;
   outline: none;
@@ -40,14 +75,15 @@ button {
 
 button:hover,
 button:focus {
-  background: #73b173;
-  box-shadow: 0 4px 0 0 seagreen;
+  background: #57B39D;
+  box-shadow: 0 4px 0 0 #32665A;
   transform: translateY(1px);
 }
 
 button:hover:active,
 button:focus:active,
-button:active {
-  box-shadow: 0 1px 0 0 seagreen;
+button:active,
+button.selected {
+  box-shadow: 0 1px 0 0 #32665A;
   transform: translateY(4px);
 }

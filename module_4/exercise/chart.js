@@ -1,6 +1,14 @@
 import * as d3 from "d3"
 
-async function drawBars() {
+async function draw() {
+  const metrics = [
+    "pre_build_time",
+    "build_time",
+    "post_build",
+    "total_time"
+  ]
+
+  let selectedMetric = metrics[0]
 
   // 1. Access data
   const dataset = await d3.csv("./data/build_times.csv")
@@ -8,10 +16,10 @@ async function drawBars() {
   // 2. Create chart dimensions
 
   let dimensions = {
-    width: window.innerWidth * 0.9,
+    width: window.innerWidth,
     height: 700,
     margin: {
-      top: 80,
+      top: 20,
       right: 50,
       bottom: 50,
       left: 50,
@@ -36,14 +44,13 @@ async function drawBars() {
 
   // init static elements
   bounds.append("g")
-    .attr("class", "bars")
+    .attr("class", "lollipops")
   bounds.append("g")
     .attr("class", "y-axis")
-    .append("text")
-    .attr("class", "y-axis-label")
-    .style("transform", `translateY(${dimensions.boundedHeight}px)`)
+    .style("transform", `translateY(-5px)`)
 
-  const drawBarChart = metric => {
+  const drawLollipopChart = metric => {
+
     const xAccessor = d => +d[metric]
     const yAccessor = d => d.build_number
 
@@ -57,84 +64,110 @@ async function drawBars() {
       .range([0, dimensions.boundedWidth])
       .nice()
 
-    // 5. Draw data
-
-    const barPadding = 1
+    // 5. Helpers
 
     const updateTransition = d3.transition()
       .duration(500)
       .ease(d3.easeCubicInOut)
-    const exitTransition = d3.transition()
-      .duration(500)
-      .ease(d3.easeCubicInOut)
 
-    let barGroups = bounds.select(".bars")
-      .selectAll(".bar")
+    const updateSeconds = secondValue => {
+      const element = document.getElementById("time")
+      element.style.opacity = "0";
+      setTimeout(() => {
+        element.innerHTML = secondValue
+        element.style.opacity = "1";
+      }, 125);
+    }
+
+    const handleMouseOver = function(e, data) {
+      updateSeconds(data[selectedMetric])
+      e.target.parentElement.classList.add("active")
+    }
+
+    const handleMouseOut = (e, data) => {
+      updateSeconds(0)
+      e.target.parentElement.classList.remove("active")
+    }
+
+    // 6. Draw data
+
+    let lollipopGroups = bounds.select(".lollipops")
+      .selectAll(".lollipop")
       .data(dataset)
 
-    const newBarGroups = barGroups.enter().append("g")
-      .attr("class", "bar")
-    newBarGroups.append("rect")
-      .attr("x", 0)
-      .attr("y", d => dimensions.boundedHeight)
-      .attr("width", 0)
-      .attr("height", yScale.bandwidth())
-      .style("fill", "yellowgreen")
-    newBarGroups.append("text")
-      .attr("x", d => xScale(xAccessor(d)))
-      .attr("y", dimensions.boundedHeight)
+    const newLollipopGroups = lollipopGroups.enter().append("g")
+      .attr("class", "lollipop")
+    
+    newLollipopGroups.append("line")
+      .attr("x1", 0)
+      .attr("x2", 0)
+      .attr("y1", d => yScale(yAccessor(d)))
+      .attr("y2", d => yScale(yAccessor(d)))
+      .style("stroke", "yellowgreen")
+    newLollipopGroups.append("circle")
+      .attr("cx", 0 )
+      .attr("cy", d => yScale(yAccessor(d)))
+      .attr("r", "4")
+      .style("fill", "#69b3a2")
+      .attr("stroke", "black")
+    newLollipopGroups.append("rect")
+      .attr('x', 0)
+      .attr('y', d => yScale(yAccessor(d)) - 4)
+      .attr('width', d => xScale(xAccessor(d)))
+      .attr('height', 10)
+      .on("mouseover", handleMouseOver)
+      .on("mouseout", handleMouseOut)
 
     // update barGroups to include new points
-    barGroups = newBarGroups.merge(barGroups)
+    lollipopGroups = newLollipopGroups.merge(lollipopGroups)
     
-    const barRects = barGroups.select("rect")
+    const rects = lollipopGroups.select("rect")
       .transition(updateTransition)
-      .attr("x", 0)
-      .attr("y", d => yScale(yAccessor(d)))
-      .attr("width", d => xScale(xAccessor(d)))
-      .attr("height", yScale.bandwidth())
+      .attr("width", d => xScale(xAccessor(d)) + 4)
       .transition()
-      .style("fill", "cornflowerblue")
+      .style("stroke", "cornflowerblue")
 
-    const barText = barGroups.select("text")
+    const lines = lollipopGroups.select("line")
       .transition(updateTransition)
-      .attr("x", d => xScale(xAccessor(d)) + 10)
-      .attr("y", d => yScale(yAccessor(d)) + 5)
-      .text(xAccessor)
+      .attr("x2", d => xScale(xAccessor(d)))
+      .transition()
+      .style("stroke", "cornflowerblue")
 
-    // 6. Draw peripherals
+    const circles = lollipopGroups.select("circle")
+      .transition(updateTransition)
+      .attr("cx", d => xScale(xAccessor(d)))
+      .transition()
+      .style("stroke", "cornflowerblue")
+
+    // 7. Draw peripherals
 
     const yAxisGenerator = d3.axisLeft()
       .scale(yScale)
+      .tickSize(0)
 
     const yAxis = bounds.select(".y-axis")
       .transition(updateTransition)
       .call(yAxisGenerator)
-
-    const yAxisLabel = yAxis.select(".y-axis-label")
-      .attr("x", dimensions.boundedWidth / 2)
-      .attr("y", 0)
-      .text(metric)
   }
 
-  const metrics = [
-    "pre_build_time",
-    "build_time",
-    "deploy_time",
-    "total_time"
-  ]
+  drawLollipopChart(metrics[0])
 
-  let selectedMetricIndex = 0
-  drawBarChart(metrics[selectedMetricIndex])
-
-  const button = d3.select("body")
+  metrics.forEach((metric, index) => {
+    const button = d3.select(".button-group")
     .append("button")
-      .text("Change metric")
+      .text(metric.replace(/_/g, " "))
 
-  button.node().addEventListener("click", onClick)
-  function onClick() {
-    selectedMetricIndex = (selectedMetricIndex + 1) % metrics.length
-    drawBarChart(metrics[selectedMetricIndex])
-  }
+    button.node().addEventListener("click", onClick)
+    function onClick(e) {
+      const buttons = document.querySelectorAll("button")
+      buttons.forEach(b => b.classList.remove("selected"))
+      e.target.classList.add("selected")
+      selectedMetric = metric
+      drawLollipopChart(metrics[index])
+    }
+  })
+
+  document.querySelector("button").classList.add("selected")
 }
-drawBars()
+
+draw()

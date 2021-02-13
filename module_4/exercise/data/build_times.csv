@@ -1,4 +1,4 @@
-date,build_number,pre_build_time,build_time,deploy_time,total_time
+date,build_number,pre_build_time,build_time,post_build,total_time
 16/11/2020,1,52,314,24,390
 16/11/2020,2,57,323,28,408
 16/11/2020,3,200,324,27,551
@@ -54,8 +54,3 @@ date,build_number,pre_build_time,build_time,deploy_time,total_time
 20/11/2020,53,56,299,30,385
 20/11/2020,54,322,355,36,713
 20/11/2020,55,193,328,38,559
-20/11/2020,56,55,279,28,362
-20/11/2020,57,57,320,27,404
-20/11/2020,58,53,276,31,360
-20/11/2020,59,58,287,32,377
-20/11/2020,60,67,299,31,397
